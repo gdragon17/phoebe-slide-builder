@@ -688,6 +688,7 @@ const handleGenerateBeautifulDeck = async () => {
         theme: context.chosenTheme,
         topic: context.topic,
         audience: context.audience,
+        template: "executiveDark",
       }),
     });
 
@@ -2007,12 +2008,12 @@ const handleGenerateBeautifulDeck = async () => {
                                   </button>
 
                                   <button
-  type="button"
-  onClick={handleGenerateBeautifulDeck}
-  className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-5 py-2.5 rounded-full transition font-bold cursor-pointer shadow-md whitespace-nowrap"
->
-  Generate Beautiful Deck
-</button>
+                                    type="button"
+                                    onClick={handleGenerateBeautifulDeck}
+                                    className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-5 py-2.5 rounded-full transition font-bold cursor-pointer shadow-md whitespace-nowrap"
+                                  >
+                                    Generate Beautiful Deck
+                                  </button>
 
 
                                   {uploadedDriveLink ? (
