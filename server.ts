@@ -499,552 +499,120 @@ app.post("/api/presentation/generate-image", async (req, res) => {
   }
 });
 
-type DeckTemplate = {
-  id: string;
-  name: string;
-  background: string;
-  surface: string;
-  panel: string;
-  text: string;
-  muted: string;
-  accent: string;
-  secondary: string;
-  bullet: string;
-  titleFont: string;
-  bodyFont: string;
-};
-
-const deckTemplates: Record<string, DeckTemplate> = {
-  executiveDark: {
-    id: "executiveDark",
-    name: "Executive Dark",
-    background: "0B1220",
-    surface: "101B2D",
-    panel: "0F2740",
-    text: "FFFFFF",
-    muted: "94A3B8",
-    accent: "22D3EE",
-    secondary: "38BDF8",
-    bullet: "FF007F",
-    titleFont: "Georgia",
-    bodyFont: "Aptos",
-  },
-  cleanWhite: {
-    id: "cleanWhite",
-    name: "Clean White",
-    background: "F8FAFC",
-    surface: "FFFFFF",
-    panel: "E0F2FE",
-    text: "0F172A",
-    muted: "64748B",
-    accent: "2563EB",
-    secondary: "0EA5E9",
-    bullet: "475569",
-    titleFont: "Aptos Display",
-    bodyFont: "Aptos",
-  },
-  neonPitch: {
-    id: "neonPitch",
-    name: "Neon Pitch",
-    background: "130A2A",
-    surface: "1E1140",
-    panel: "251254",
-    text: "FFFFFF",
-    muted: "C4B5FD",
-    accent: "A3FF12",
-    secondary: "7C3AED",
-    bullet: "FF2E88",
-    titleFont: "Aptos Display",
-    bodyFont: "Aptos",
-  },
-};
-
-function chooseDeckTemplate(requestedTemplate?: string): DeckTemplate {
-  return deckTemplates[requestedTemplate || ""] || deckTemplates.executiveDark;
-}
-
-function safeText(value: unknown, fallback = "") {
-  if (typeof value !== "string") return fallback;
-  return value.trim() || fallback;
-}
-
-function slideNumber(index: number) {
-  return String(index + 1).padStart(2, "0");
-}
-
-function addDeckChrome(slide: any, template: DeckTemplate, index: number, label = "STRATEGIC OUTLINE") {
-  slide.addText(label, {
-    x: 0.62,
-    y: 0.43,
-    w: 3.4,
-    h: 0.24,
-    fontFace: template.bodyFont,
-    fontSize: 9,
-    bold: true,
-    charSpace: 2.2,
-    color: template.muted,
-    margin: 0,
-  });
-
-  slide.addText(slideNumber(index), {
-    x: 12.12,
-    y: 0.42,
-    w: 0.55,
-    h: 0.24,
-    fontFace: template.bodyFont,
-    fontSize: 10,
-    bold: true,
-    color: template.muted,
-    align: "right",
-    margin: 0,
-  });
-
-  slide.addShape("line", {
-    x: 0.62,
-    y: 6.72,
-    w: 12.08,
-    h: 0,
-    line: { color: template.muted, transparency: 55, width: 0.7 },
-  });
-
-  slide.addText("OUTLINE ARCHITECT DRAFT", {
-    x: 9.6,
-    y: 6.92,
-    w: 3.1,
-    h: 0.24,
-    fontFace: template.bodyFont,
-    fontSize: 8,
-    bold: true,
-    charSpace: 1.9,
-    color: template.muted,
-    align: "right",
-    margin: 0,
-  });
-}
-
-function addVisualPanel(slide: any, template: DeckTemplate, item: any) {
-  slide.addShape("rect", {
-    x: 7.45,
-    y: 1.55,
-    w: 5.05,
-    h: 4.65,
-    fill: { color: template.surface },
-    line: { color: template.accent, transparency: 75, width: 1.1 },
-  });
-
-  slide.addShape("rect", {
-    x: 7.78,
-    y: 1.88,
-    w: 4.39,
-    h: 4.0,
-    fill: { color: template.panel, transparency: 8 },
-    line: { color: template.muted, transparency: 82, width: 0.7 },
-  });
-
-  for (let i = 0; i < 4; i += 1) {
-    slide.addShape("ellipse", {
-      x: 8.02 + i * 0.86,
-      y: 2.18 + (i % 2) * 0.42,
-      w: 0.38,
-      h: 0.38,
-      fill: { color: i % 2 === 0 ? template.accent : template.bullet, transparency: 12 },
-      line: { color: i % 2 === 0 ? template.accent : template.bullet, transparency: 35 },
-    });
-  }
-
-  slide.addShape("line", {
-    x: 8.2,
-    y: 3.25,
-    w: 3.6,
-    h: 0,
-    line: { color: template.accent, transparency: 25, width: 1.2 },
-  });
-  slide.addShape("line", {
-    x: 8.2,
-    y: 3.58,
-    w: 2.65,
-    h: 0,
-    line: { color: template.bullet, transparency: 30, width: 1.2 },
-  });
-  slide.addShape("line", {
-    x: 8.2,
-    y: 3.91,
-    w: 3.05,
-    h: 0,
-    line: { color: template.secondary, transparency: 30, width: 1.2 },
-  });
-
-  slide.addText("VISUAL DIRECTION", {
-    x: 8.18,
-    y: 4.55,
-    w: 3.8,
-    h: 0.22,
-    fontFace: template.bodyFont,
-    fontSize: 7,
-    bold: true,
-    charSpace: 1.6,
-    color: template.accent,
-    margin: 0,
-  });
-
-  slide.addText(safeText(item.visualSuggestion, "Use a bold editorial visual, diagram, or metaphor that clarifies the core message."), {
-    x: 8.18,
-    y: 4.86,
-    w: 3.6,
-    h: 0.74,
-    fontFace: template.bodyFont,
-    fontSize: 8.2,
-    color: template.muted,
-    breakLine: false,
-    fit: "shrink",
-    valign: "top",
-    margin: 0,
-  });
-}
-
-function addCoverSlide(pptx: any, template: DeckTemplate, topic: string, slides: any[], audience?: string) {
-  const slide = pptx.addSlide();
-  slide.background = { color: template.background };
-
-  slide.addShape("rect", {
-    x: 0,
-    y: 0,
-    w: 13.33,
-    h: 7.5,
-    fill: { color: template.background },
-    line: { color: template.background },
-  });
-  slide.addShape("rect", {
-    x: 0,
-    y: 0,
-    w: 13.33,
-    h: 0.16,
-    fill: { color: template.accent },
-    line: { color: template.accent },
-  });
-  slide.addShape("rect", {
-    x: 8.5,
-    y: 0.9,
-    w: 3.55,
-    h: 5.55,
-    fill: { color: template.surface, transparency: 6 },
-    line: { color: template.accent, transparency: 78 },
-  });
-  slide.addShape("line", {
-    x: 8.92,
-    y: 1.52,
-    w: 2.62,
-    h: 0,
-    line: { color: template.bullet, width: 2.2 },
-  });
-  slide.addShape("line", {
-    x: 8.92,
-    y: 2.12,
-    w: 1.8,
-    h: 0,
-    line: { color: template.accent, width: 2.2 },
-  });
-  slide.addShape("line", {
-    x: 8.92,
-    y: 2.72,
-    w: 2.35,
-    h: 0,
-    line: { color: template.secondary, width: 2.2 },
-  });
-
-  slide.addText("PHOEBE PRESENTS", {
-    x: 0.82,
-    y: 0.72,
-    w: 3.6,
-    h: 0.24,
-    fontFace: template.bodyFont,
-    fontSize: 9,
-    bold: true,
-    charSpace: 2.1,
-    color: template.muted,
-    margin: 0,
-  });
-  slide.addText(topic, {
-    x: 0.78,
-    y: 1.84,
-    w: 7.1,
-    h: 1.5,
-    fontFace: template.titleFont,
-    fontSize: 34,
-    bold: true,
-    color: template.text,
-    margin: 0,
-    fit: "shrink",
-    breakLine: false,
-  });
-  slide.addText(audience ? `Built for ${audience}` : "A generated strategic presentation blueprint", {
-    x: 0.82,
-    y: 3.52,
-    w: 5.9,
-    h: 0.38,
-    fontFace: template.bodyFont,
-    fontSize: 13,
-    italic: true,
-    color: template.accent,
-    margin: 0,
-  });
-
-  const agenda = slides.slice(0, 4).map((item: any, index: number) => `${slideNumber(index)}  ${safeText(item.title, `Section ${index + 1}`)}`);
-  slide.addText(agenda.join("\n"), {
-    x: 0.84,
-    y: 4.65,
-    w: 6.4,
-    h: 1.25,
-    fontFace: template.bodyFont,
-    fontSize: 10.5,
-    color: template.muted,
-    breakLine: false,
-    fit: "shrink",
-    margin: 0,
-  });
-  slide.addText(template.name.toUpperCase(), {
-    x: 9.02,
-    y: 5.7,
-    w: 2.6,
-    h: 0.24,
-    fontFace: template.bodyFont,
-    fontSize: 8,
-    bold: true,
-    charSpace: 1.7,
-    color: template.muted,
-    align: "right",
-    margin: 0,
-  });
-}
-
-function addAgendaSlide(pptx: any, template: DeckTemplate, slides: any[]) {
-  const slide = pptx.addSlide();
-  slide.background = { color: template.background };
-  addDeckChrome(slide, template, 1, "DECK ROADMAP");
-
-  slide.addText("Presentation Flow", {
-    x: 0.75,
-    y: 1.02,
-    w: 5.7,
-    h: 0.62,
-    fontFace: template.titleFont,
-    fontSize: 30,
-    bold: true,
-    color: template.text,
-    margin: 0,
-  });
-  slide.addText("A quick read of how the story builds from context to recommendation.", {
-    x: 0.78,
-    y: 1.78,
-    w: 6.8,
-    h: 0.36,
-    fontFace: template.bodyFont,
-    fontSize: 12,
-    italic: true,
-    color: template.accent,
-    margin: 0,
-  });
-
-  slides.slice(0, 6).forEach((item: any, index: number) => {
-    const rowY = 2.55 + index * 0.55;
-    slide.addText(slideNumber(index), {
-      x: 0.82,
-      y: rowY,
-      w: 0.45,
-      h: 0.24,
-      fontFace: template.bodyFont,
-      fontSize: 9,
-      bold: true,
-      color: template.bullet,
-      margin: 0,
-    });
-    slide.addText(safeText(item.title, `Section ${index + 1}`), {
-      x: 1.35,
-      y: rowY - 0.02,
-      w: 6.7,
-      h: 0.28,
-      fontFace: template.bodyFont,
-      fontSize: 12,
-      bold: true,
-      color: template.text,
-      margin: 0,
-      fit: "shrink",
-    });
-  });
-
-  slide.addShape("rect", {
-    x: 8.55,
-    y: 1.05,
-    w: 3.8,
-    h: 4.85,
-    fill: { color: template.surface },
-    line: { color: template.accent, transparency: 72 },
-  });
-  for (let i = 0; i < 5; i += 1) {
-    slide.addShape("ellipse", {
-      x: 9.05 + i * 0.54,
-      y: 2.45 + i * 0.36,
-      w: 0.32,
-      h: 0.32,
-      fill: { color: i % 2 === 0 ? template.accent : template.bullet, transparency: 10 },
-      line: { color: i % 2 === 0 ? template.accent : template.bullet, transparency: 20 },
-    });
-  }
-}
-
-function addSectionDivider(pptx: any, template: DeckTemplate, item: any, visualIndex: number) {
-  const slide = pptx.addSlide();
-  slide.background = { color: template.background };
-  addDeckChrome(slide, template, visualIndex, "SECTION BREAK");
-
-  slide.addShape("rect", {
-    x: 0.8,
-    y: 1.25,
-    w: 0.12,
-    h: 4.25,
-    fill: { color: template.bullet },
-    line: { color: template.bullet },
-  });
-  slide.addText(safeText(item.title, "Next Section"), {
-    x: 1.18,
-    y: 2.25,
-    w: 8.7,
-    h: 1.2,
-    fontFace: template.titleFont,
-    fontSize: 36,
-    bold: true,
-    color: template.text,
-    fit: "shrink",
-    margin: 0,
-  });
-  slide.addText(safeText(item.headline, "A new movement in the presentation story."), {
-    x: 1.22,
-    y: 3.6,
-    w: 7.1,
-    h: 0.38,
-    fontFace: template.bodyFont,
-    fontSize: 13,
-    italic: true,
-    color: template.accent,
-    margin: 0,
-  });
-  slide.addShape("ellipse", {
-    x: 10.55,
-    y: 1.65,
-    w: 1.7,
-    h: 1.7,
-    fill: { color: template.accent, transparency: 20 },
-    line: { color: template.accent, transparency: 35 },
-  });
-  slide.addShape("ellipse", {
-    x: 9.72,
-    y: 3.25,
-    w: 2.25,
-    h: 2.25,
-    fill: { color: template.bullet, transparency: 24 },
-    line: { color: template.bullet, transparency: 42 },
-  });
-}
-
-function addContentSlide(pptx: any, template: DeckTemplate, item: any, index: number) {
-  const slide = pptx.addSlide();
-  slide.background = { color: template.background };
-  addDeckChrome(slide, template, index + 2);
-
-  slide.addText(safeText(item.title, `Slide ${index + 1}`), {
-    x: 0.72,
-    y: 1.24,
-    w: 6.3,
-    h: 0.95,
-    fontFace: template.titleFont,
-    fontSize: 28,
-    bold: true,
-    color: template.text,
-    fit: "shrink",
-    margin: 0,
-    breakLine: false,
-  });
-
-  slide.addText(safeText(item.headline, "A focused point of view for this section."), {
-    x: 0.76,
-    y: 2.18,
-    w: 6.1,
-    h: 0.48,
-    fontFace: template.bodyFont,
-    fontSize: 13.5,
-    italic: true,
-    color: template.accent,
-    fit: "shrink",
-    margin: 0,
-  });
-
-  const bullets = Array.isArray(item.bullets) ? item.bullets.slice(0, 5) : [];
-  bullets.forEach((bullet: string, bulletIndex: number) => {
-    const y = 3.05 + bulletIndex * 0.52;
-    slide.addShape("ellipse", {
-      x: 0.79,
-      y: y + 0.12,
-      w: 0.08,
-      h: 0.08,
-      fill: { color: template.bullet },
-      line: { color: template.bullet },
-    });
-    slide.addText(bullet, {
-      x: 1.08,
-      y,
-      w: 5.9,
-      h: 0.36,
-      fontFace: template.bodyFont,
-      fontSize: 12.5,
-      color: template.text,
-      fit: "shrink",
-      margin: 0,
-      breakLine: false,
-    });
-  });
-
-  addVisualPanel(slide, template, item);
-
-  if (item.speakerNotes) {
-    slide.addNotes(item.speakerNotes);
-  }
-}
-
 // 5. Unified API to generate a complete deck in a single call (useful for programmatic usage or integrations)
 app.post("/api/generate-deck", async (req, res) => {
   try {
-    const {
-      slides = [],
-      topic = "Beautiful Deck",
-      audience = "",
-      template = "executiveDark",
-    } = req.body || {};
-    const slideItems = Array.isArray(slides) ? slides : [];
-    const selectedTemplate = chooseDeckTemplate(template);
+    const { slides = [], theme = {}, topic = "Beautiful Deck" } = req.body || {};
 
     const PptxGenJS = (pptxgenjsModule as any).default || pptxgenjsModule;
-    const pptx = new PptxGenJS();
+const pptx = new PptxGenJS();
     pptx.layout = "LAYOUT_WIDE";
     pptx.author = "Phoebe";
-    pptx.subject = "Beautiful AI-generated presentation";
-    pptx.company = "Phoebe";
 
     pptx.theme = {
-      headFontFace: selectedTemplate.titleFont,
-      bodyFontFace: selectedTemplate.bodyFont,
-      lang: "en-US",
+      headFontFace: "Aptos Display",
+      bodyFontFace: "Aptos",
     };
 
-    addCoverSlide(pptx, selectedTemplate, safeText(topic, "Beautiful Deck"), slideItems, audience);
-    if (slideItems.length > 1) {
-      addAgendaSlide(pptx, selectedTemplate, slideItems);
-    }
+    const executiveDark = {
+      background: "0B1220",
+  text: "FFFFFF",
+  accent: "00FFFF",
+  bullet: "FF00FF",
+  muted: "8892B0"
+    };
 
-    slideItems.forEach((item: any, index: number) => {
-      if (index > 0 && index % 3 === 0) {
-        addSectionDivider(pptx, selectedTemplate, item, index + 2);
+    const cover = pptx.addSlide();
+    cover.background = { color: executiveDark.background };
+    cover.addShape(pptx.ShapeType.rect, {
+      x: 0,
+      y: 0,
+      w: 13.33,
+      h: 0.18,
+      fill: { color: executiveDark.accent },
+      line: { color: executiveDark.accent },
+    });
+    cover.addText(topic, {
+      x: 0.75,
+      y: 1.55,
+      w: 11.8,
+      h: 1.2,
+      fontFace: "Aptos Display",
+      fontSize: 36,
+      bold: true,
+      color: executiveDark.text,
+      margin: 0,
+      fit: "shrink",
+    });
+    cover.addText("Generated by Phoebe", {
+      x: 0.8,
+      y: 3.1,
+      w: 6,
+      h: 0.35,
+      fontSize: 14,
+      color: executiveDark.muted,
+    });
+
+    slides.forEach((item: any, index: number) => {
+      const slide = pptx.addSlide();
+      slide.background = { color: executiveDark.background };
+
+      slide.addText(`0${index + 1}`.slice(-2), {
+        x: 0.6,
+        y: 0.45,
+        w: 0.7,
+        h: 0.3,
+        fontSize: 11,
+        bold: true,
+        color: executiveDark.accent,
+      });
+
+      slide.addText(item.title || `Slide ${index + 1}`, {
+        x: 0.75,
+        y: 1.35,
+        w: 6.2,
+        h: 0.65,
+        fontFace: "Georgia",
+        fontSize: 28,
+        bold: true,
+        color: executiveDark.text,
+        fit: "shrink",
+      });
+
+      if (item.headline) {
+        slide.addText(item.headline, {
+          x: 0.75,
+y: 2.05,
+w: 6.4,
+h: 0.45,
+fontSize: 14,
+italic: true,
+color: executiveDark.accent,
+          fit: "shrink",
+        });
       }
-      addContentSlide(pptx, selectedTemplate, item, index);
+
+      const bullets = Array.isArray(item.bullets) ? item.bullets.slice(0, 5) : [];
+      bullets.forEach((bullet: string, bulletIndex: number) => {
+        slide.addShape(pptx.ShapeType.ellipse, {
+          x: 1,
+          y: 2.25 + bulletIndex * 0.62,
+          w: 0.13,
+          h: 0.13,
+          fill: { color: executiveDark.bullet },
+          line: { color: executiveDark.bullet },
+        });
+
+        slide.addText(bullet, {
+          x: 1.3,
+          y: 2.1 + bulletIndex * 0.62,
+          w: 10.8,
+          h: 0.36,
+          fontSize: 13,
+          color: executiveDark.text,
+          fit: "shrink",
+        });
+      });
     });
 
     const buffer = await pptx.write({ outputType: "nodebuffer" });
@@ -1055,7 +623,7 @@ app.post("/api/generate-deck", async (req, res) => {
     );
     res.setHeader(
       "Content-Disposition",
-      `attachment; filename="${selectedTemplate.id}-beautiful-deck.pptx"`
+      'attachment; filename="beautiful-deck.pptx"'
     );
 
     res.send(buffer);
