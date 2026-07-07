@@ -1,0 +1,6 @@
+{
+  "name": "Phoebe",
+  "description": "An intelligent web application that guides users from raw ideas to highly structured, visually thematic presentation outlines ready for PPT export, powered by Gemini AI.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
