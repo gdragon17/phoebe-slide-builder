@@ -74,6 +74,14 @@ const EXAMPLES = [
   }
 ];
 
+const DECK_TEMPLATE_OPTIONS = [
+  { id: "executiveDark", label: "Executive Dark" },
+  { id: "cleanWhite", label: "Clean White" },
+  { id: "neonPitch", label: "Neon Pitch" }
+] as const;
+
+type DeckTemplateId = typeof DECK_TEMPLATE_OPTIONS[number]["id"];
+
 export default function App() {
   // Sidebar tab selection
   const [sidebarTab, setSidebarTab] = useState<"slides" | "writer" | "summarizer" | "chat" | "pdf" | "mindmap" | "themes" | "teamwork" | "history">("slides");
@@ -114,6 +122,7 @@ export default function App() {
   const [selectedCardCount, setSelectedCardCount] = useState<string>("11-15 cards");
   const [selectedLanguage, setSelectedLanguage] = useState<string>("English");
   const [selectedTextLength, setSelectedTextLength] = useState<string>("Detailed");
+  const [selectedDeckTemplate, setSelectedDeckTemplate] = useState<DeckTemplateId>("executiveDark");
 
   // Dropdown states
   const [showAudienceMenu, setShowAudienceMenu] = useState(false);
@@ -688,6 +697,7 @@ const handleGenerateBeautifulDeck = async () => {
         theme: context.chosenTheme,
         topic: context.topic,
         audience: context.audience,
+        template: selectedDeckTemplate,
       }),
     });
 
@@ -1998,6 +2008,22 @@ const handleGenerateBeautifulDeck = async () => {
                                   </p>
                                 </div>
                                 <div className="flex items-center gap-2 flex-wrap">
+                                  <label className="flex items-center gap-2 bg-white border border-emerald-100 text-slate-700 text-xs px-3 py-2.5 rounded-full shadow-sm">
+                                    <Palette className="w-3.5 h-3.5 text-indigo-600" />
+                                    <select
+                                      value={selectedDeckTemplate}
+                                      onChange={(event) => setSelectedDeckTemplate(event.target.value as DeckTemplateId)}
+                                      className="bg-transparent text-xs font-bold outline-none cursor-pointer"
+                                      aria-label="Beautiful deck template"
+                                    >
+                                      {DECK_TEMPLATE_OPTIONS.map((template) => (
+                                        <option key={template.id} value={template.id}>
+                                          {template.label}
+                                        </option>
+                                      ))}
+                                    </select>
+                                  </label>
+
                                   <button
                                     onClick={handleDownloadPPTX}
                                     className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-5 py-2.5 rounded-full transition font-bold cursor-pointer shadow-md whitespace-nowrap"
@@ -2007,12 +2033,12 @@ const handleGenerateBeautifulDeck = async () => {
                                   </button>
 
                                   <button
-  type="button"
-  onClick={handleGenerateBeautifulDeck}
-  className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-5 py-2.5 rounded-full transition font-bold cursor-pointer shadow-md whitespace-nowrap"
->
-  Generate Beautiful Deck
-</button>
+                                    type="button"
+                                    onClick={handleGenerateBeautifulDeck}
+                                    className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-5 py-2.5 rounded-full transition font-bold cursor-pointer shadow-md whitespace-nowrap"
+                                  >
+                                    Generate Beautiful Deck
+                                  </button>
 
 
                                   {uploadedDriveLink ? (
